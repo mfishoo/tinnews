@@ -8,11 +8,11 @@ import androidx.lifecycle.ViewModel;
 import com.laioffer.tinnews.model.NewsResponse;
 import com.laioffer.tinnews.repository.NewsRepository;
 
-public class SearchViewModle extends ViewModel {
+public class SearchViewModel extends ViewModel {
     private final NewsRepository repository;
     private final MutableLiveData<String> searchInput = new MutableLiveData<>();
 
-    public SearchViewModle(NewsRepository repository){
+    public SearchViewModel(NewsRepository repository){
         this.repository = repository;
     }
 

@@ -6,13 +6,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.GridLayout;
 
 import com.laioffer.tinnews.R;
+import com.laioffer.tinnews.databinding.FragmentHomeBinding;
+import com.laioffer.tinnews.databinding.FragmentSearchBinding;
 import com.laioffer.tinnews.repository.NewsRepository;
 import com.laioffer.tinnews.repository.NewsViewModelFactory;
 
@@ -28,7 +33,8 @@ public class SearchFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private SearchViewModle viewModle;
+    private SearchViewModel viewModel;
+    private FragmentSearchBinding binding;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -69,19 +75,47 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_search, container, false);
+        binding = FragmentSearchBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        SearchNewsAdapter newsAdapter = new SearchNewsAdapter();
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return position == 0 ? 2 : 1;
+            }
+        });
+        binding.recyclerView.setLayoutManager(gridLayoutManager);
+        binding.recyclerView.setAdapter(newsAdapter);
+
+        binding.searchView.setOnEditorActionListener(
+                (v, actionId, event) -> {
+                    String searchText = binding.searchView.getText().toString();
+
+
+                    if (actionId == EditorInfo.IME_ACTION_DONE && !searchText.isEmpty()) {
+                        viewModel.setSearchInput(searchText);
+                        Log.d("input", searchText);
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+        );
+
         NewsRepository repository = new NewsRepository(getContext());
-        viewModle = new ViewModelProvider(this, new NewsViewModelFactory(repository)).get(SearchViewModle.class);
-        viewModle.setSearchInput("Covid-19");
-        viewModle.searchNews().observe(getViewLifecycleOwner(), newsResponse -> {
-            if(newsResponse != null){
-                Log.d("SearchFragment", newsResponse.toString());
+        viewModel = new ViewModelProvider(this, new NewsViewModelFactory(repository)).get(SearchViewModel.class);
+        viewModel.searchNews().observe(getViewLifecycleOwner(), newsResponse -> {
+            if (newsResponse != null) {
+                Log.d("SearchDebug", newsResponse.toString());
+                newsAdapter.setArticles(newsResponse.articles);
             }
         });
     }
