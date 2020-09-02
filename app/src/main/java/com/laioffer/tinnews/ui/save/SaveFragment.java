@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.laioffer.tinnews.R;
 import com.laioffer.tinnews.databinding.FragmentSaveBinding;
+import com.laioffer.tinnews.model.Article;
 import com.laioffer.tinnews.repository.NewsRepository;
 import com.laioffer.tinnews.repository.NewsViewModelFactory;
 
@@ -90,6 +91,17 @@ public class SaveFragment extends Fragment {
             if(savedArticles != null){
                 Log.d("SaveFragment", savedArticles.toString());
                 savedNewsAdapter.setArticles(savedArticles);
+            }
+        });
+        savedNewsAdapter.setOnClickListener(new SavedNewsAdapter.OnClickListener() {
+            @Override
+            public void onClick(Article article) {
+
+            }
+
+            @Override
+            public void unLike(Article article) {
+                viewModel.deleteSavedArticle(article);
             }
         });
     }
